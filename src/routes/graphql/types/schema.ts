@@ -1,8 +1,9 @@
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { memberFields } from "./memberType.js";
-import { userFields } from './user.js';
-import { profileFields } from './profile.js';
-import { postFields } from './post.js';
+import { userFields, userMutations } from './user.js';
+import { profileFields, profileMutations } from './profile.js';
+import { postFields, postMutations } from './post.js';
+import { subscribeMutations } from './subscribersOnAuthors.js'
 
 export const schema = new GraphQLSchema({
     query: new GraphQLObjectType({
@@ -13,5 +14,14 @@ export const schema = new GraphQLSchema({
         ...profileFields,
         ...postFields
       }),
+    }),
+    mutation: new GraphQLObjectType({
+      name: 'Mutation',
+      fields: () => ({
+        ...userMutations,
+        ...profileMutations,
+        ...postMutations,
+        ...subscribeMutations,
+      })
     })
   })

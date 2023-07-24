@@ -2,19 +2,7 @@ import { GraphQLObjectType, GraphQLNonNull, GraphQLFloat, GraphQLList, GraphQLIn
 import { ProfileType } from './profile.js';
 import { dbObject } from '../utils/prismaClient.js';
 import { MemberType as TMemberType } from '@prisma/client';
-import db from '../../../plugins/db.js';
-
-export const MemberTypeId = new GraphQLEnumType({
-name: 'MemberTypeId',
-values: {
-  basic: {
-    value: 'basic'
-  },
-  business: {
-    value: 'business'
-  }
-}
-})
+import { MemberTypeId } from './memberEnum.js';
 
 export const MemberType = new GraphQLObjectType({
   name: 'memberType',
