@@ -1,8 +1,10 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLFloat, GraphQLList, GraphQLInt, GraphQLEnumType } from 'graphql';
 import { ProfileType } from './profile.js';
 import { dbObject } from '../utils/prismaClient.js';
+import { MemberType as TMemberType } from '@prisma/client';
+import db from '../../../plugins/db.js';
 
-const MemberTypeId = new GraphQLEnumType({
+export const MemberTypeId = new GraphQLEnumType({
 name: 'MemberTypeId',
 values: {
   basic: {
@@ -30,6 +32,7 @@ export const MemberType = new GraphQLObjectType({
       },
       profiles: {
         type: new GraphQLList(ProfileType),
+        resolve: (memberType: TMemberType) => dbObject.client.profile.findMany({ where: { memberTypeId: memberType.id }})
       }
     },
 })
@@ -37,7 +40,7 @@ export const MemberType = new GraphQLObjectType({
 export const memberFields = {
   memberTypes: {
   type: new GraphQLList(MemberType),
-  resolve: async () => await dbObject.client.memberType.findMany(),
+  resolve: () => dbObject.client.memberType.findMany(),
   },
   memberType: {
     type: MemberType,
@@ -46,7 +49,7 @@ export const memberFields = {
         type: MemberTypeId
       }
     },
-    resolve: async (_, {id}) => await dbObject.client.memberType.findUnique({
+    resolve: (_, {id}) => dbObject.client.memberType.findUnique({
       where: {
         id: id as string
       },
