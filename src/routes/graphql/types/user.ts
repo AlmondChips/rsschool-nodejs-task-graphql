@@ -1,13 +1,10 @@
 
-import { GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLList } from 'graphql';
+import { GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLList, GraphQLInputObjectType, GraphQLBoolean } from 'graphql';
 import { UUIDType } from "./uuid.js";
 import { ProfileType } from './profile.js'
 import { PostType } from './post.js';
-import { subscribersOnAuthors } from './subscribersOnAuthors.js';
 import { dbObject } from '../utils/prismaClient.js';
 import { SubscribersOnAuthors, User } from '@prisma/client';
-import { GetResult } from '@prisma/client/runtime/library.js';
-import { resolve } from 'path';
 import { GraphQlObject } from '../typesTS/GrapQLObjectType.js';
 
 export const UserType: GraphQlObject<User> = new GraphQLObjectType({
@@ -67,3 +64,65 @@ export const userFields = {
     }),
   }
 }
+
+export const userMutations = {
+  createUser: {
+    type: UserType,
+    args: {
+      dto: {
+        type: new GraphQLNonNull(new GraphQLInputObjectType({
+          name: 'CreateUserInput',
+          fields: {
+            name: {
+              type: new GraphQLNonNull(GraphQLString)
+            },
+            balance: {
+              type: new GraphQLNonNull(GraphQLFloat)
+            }
+          }
+        }))
+      }
+    },
+    resolve: (_, {dto: {name, balance}}: { dto: {name: string, balance: number}}) => dbObject.client.user.create({
+      data: { name, balance },
+    })
+  },
+  deleteUser: {
+    type: GraphQLBoolean,
+    args: {
+      id: {
+         type: new GraphQLNonNull(UUIDType)
+        },
+    },
+    resolve: (_, {id}: {id: string}) => dbObject.client.user.delete({
+      where: { id },
+    }).then(() => true)
+  },
+  changeUser: {
+    type: UserType,
+    args: {
+      id: {
+        type: new GraphQLNonNull(UUIDType)
+      },
+      dto: {
+        type: new GraphQLNonNull(new GraphQLInputObjectType({
+          name: 'ChangeUserInput',
+          fields: {
+            name: {
+              type: GraphQLString
+            },
+            balance: {
+              type: GraphQLFloat
+            }
+          }
+        }))
+      }
+    },
+    resolve: (_, {id, dto: {name, balance}}: {id: string, dto: {name: string, balance: number}}) =>
+      dbObject.client.user.update({
+        where: { id },
+        data: { name, balance },
+    })
+  },
+}
+
